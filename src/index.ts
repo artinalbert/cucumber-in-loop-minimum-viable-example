@@ -1,22 +1,29 @@
 import {
-  IRunConfiguration,
   loadConfiguration,
+  loadSupport,
   runCucumber,
 } from "@cucumber/cucumber/api";
 import path from "path";
 
 async function main() {
+  const { runConfiguration } = await loadConfiguration({
+    provided: {
+      paths: [
+        path.join(__dirname, "../features/tests.feature"),
+      ],
+      require: [
+        path.join(__dirname, "../features/support/steps.ts"),
+      ],
+      parallel: 10
+    },
+  });
+  const support = await loadSupport(runConfiguration)
+
   for (let i = 0; i < 3; i++) {
-    const { runConfiguration } = await loadConfiguration({
-      provided: { parallel: 10 },
+    runCucumber({
+      ...runConfiguration,
+      support
     });
-    runConfiguration.sources.paths = [
-      path.join(__dirname, "../features/tests.feature"),
-    ];
-    runConfiguration.support.requireModules = [
-      path.join(__dirname, "../features/support/steps.ts"),
-    ];
-    runCucumber(runConfiguration);
   }
 }
 
